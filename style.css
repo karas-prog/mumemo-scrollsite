@@ -61,7 +61,7 @@ main#content {
 
 .float-text {
   position: absolute;
-  max-width: 90vw;
+  max-width: 86vw;
   opacity: 0;
   filter: blur(6px);
   transform: translateY(40px) scale(0.94);
@@ -80,23 +80,23 @@ main#content {
   transform: translateY(-60px) scale(1.08);
 }
 
-.pos-tl        { top: 6%;  left: 6%; }
-.pos-tr        { top: 6%;  right: 6%; text-align: right; }
-.pos-center    { top: 22%; left: 50%; transform: translate(-50%, 0); text-align: center; width: 92%; }
-.pos-center-sub{ top: 42%; left: 50%; transform: translate(-50%, 0); text-align: center; width: 92%; }
-.pos-left      { top: 55%; left: 6%;  max-width: 42ch; }
-.pos-right     { top: 68%; right: 6%; text-align: right; max-width: 40ch; }
-.pos-bottom    { bottom: 8%; left: 50%; transform: translate(-50%, 0); text-align: center; }
-.pos-bottom-left  { bottom: 14%; left: 6%; max-width: 44ch; }
-.pos-bottom-right { bottom: 10%; right: 6%; text-align: right; max-width: 40ch; }
-.pos-mid       { top: 46%; left: 50%; transform: translate(-50%, 0); text-align: center; }
+.pos-tl         { top: 6%;  left: 8%; }
+.pos-tr         { top: 6%;  left: 60%; max-width: 34ch; }
+.pos-center     { top: 20%; left: 50%; transform: translate(-50%, 0); text-align: center; width: 90%; }
+.pos-center-sub { top: 40%; left: 50%; transform: translate(-50%, 0); text-align: center; width: 90%; }
+.pos-left       { top: 54%; left: 8%;  max-width: 46ch; }
+.pos-right      { top: 68%; left: 52%; max-width: 42ch; }
+.pos-bottom     { bottom: 8%; left: 50%; transform: translate(-50%, 0); text-align: center; max-width: 70ch; }
+.pos-bottom-left  { bottom: 14%; left: 8%; max-width: 46ch; }
+.pos-bottom-right { bottom: 10%; left: 50%; max-width: 42ch; }
+.pos-mid        { top: 46%; left: 50%; transform: translate(-50%, 0); text-align: center; }
 
-.pos-c1 { top: 34%; left: 8%; }
-.pos-c2 { top: 40%; right: 10%; }
-.pos-c3 { top: 52%; left: 14%; }
-.pos-c4 { top: 60%; right: 8%; }
-.pos-c5 { top: 70%; left: 10%; }
-.pos-c6 { top: 78%; right: 14%; }
+.pos-c1 { top: 32%; left: 10%; }
+.pos-c2 { top: 38%; left: 55%; }
+.pos-c3 { top: 48%; left: 18%; }
+.pos-c4 { top: 56%; left: 48%; }
+.pos-c5 { top: 66%; left: 12%; }
+.pos-c6 { top: 74%; left: 44%; }
 
 .tag {
   font-size: 0.68rem;
@@ -273,8 +273,8 @@ main#content {
 }
 
 @media (max-width: 760px) {
-  .float-text { max-width: 88vw !important; }
-  .pos-left, .pos-right, .pos-bottom-left, .pos-bottom-right { max-width: 88vw; }
+  .float-text { max-width: 88vw !important; left: 6% !important; right: auto !important; }
+  .pos-tr, .pos-right, .pos-bottom-right, .pos-c2, .pos-c4, .pos-c6 { left: 6% !important; }
   .nav-dots { right: 1rem; }
   .nav-dot span { display: none; }
 }
