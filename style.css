@@ -67,26 +67,73 @@ main#content {
   align-items: center;
   justify-content: center;
   padding: 6vh 5vw;
+  perspective: 1400px;
 }
 
-.glass-card {
-  max-width: 720px;
+.glass-card.ring-card {
+  max-width: 680px;
   width: 100%;
-  background: rgba(10, 8, 20, 0.42);
-  border: 1px solid rgba(255,255,255,0.14);
-  border-radius: 4px;
-  backdrop-filter: blur(14px) saturate(140%);
-  -webkit-backdrop-filter: blur(14px) saturate(140%);
-  padding: 3.2rem 2.6rem;
-  box-shadow: 0 0 60px rgba(70, 230, 255, 0.08), inset 0 0 40px rgba(255,255,255,0.02);
+  aspect-ratio: 1 / 1;
+  max-height: 82vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 38%, rgba(20, 14, 36, 0.55), rgba(6, 4, 14, 0.72) 72%);
+  border: 1px solid rgba(255,255,255,0.16);
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  padding: 4rem 3.4rem;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.04) inset,
+    0 0 90px rgba(70, 230, 255, 0.14),
+    0 0 160px rgba(255, 79, 163, 0.08);
   opacity: 0;
-  transform: translateY(40px);
-  transition: opacity 0.9s ease, transform 0.9s ease;
+  transform: translateZ(-900px) scale(0.35) rotateX(12deg);
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+  transition: opacity 0.5s linear, transform 0.5s linear;
 }
 
-.glass-card.in-view {
+.glass-card.ring-card::before {
+  content: '';
+  position: absolute;
+  inset: -18px;
+  border-radius: 50%;
+  border: 1px solid rgba(70, 230, 255, 0.25);
+  pointer-events: none;
+}
+
+.glass-card.ring-card::after {
+  content: '';
+  position: absolute;
+  inset: -40px;
+  border-radius: 50%;
+  border: 1px dashed rgba(255, 79, 163, 0.16);
+  pointer-events: none;
+}
+
+.glass-card.ring-card.in-view {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateZ(0) scale(1) rotateX(0deg);
+}
+
+.glass-card.ring-card.passed {
+  opacity: 0;
+  transform: translateZ(500px) scale(1.5) rotateX(-8deg);
+}
+
+@media (max-width: 760px) {
+  .glass-card.ring-card {
+    border-radius: 32px;
+    aspect-ratio: auto;
+    max-height: none;
+    padding: 2.6rem 1.7rem;
+  }
+  .glass-card.ring-card::before,
+  .glass-card.ring-card::after { display: none; }
 }
 
 .mono-tag {
@@ -100,7 +147,7 @@ main#content {
 .mono-tag.small { font-size: 0.62rem; opacity: 0.5; }
 
 .mega-title {
-  font-size: clamp(3.2rem, 11vw, 7rem);
+  font-size: clamp(2.6rem, 8vw, 5.2rem);
   line-height: 0.95;
   font-weight: 800;
   letter-spacing: -0.02em;
@@ -112,61 +159,60 @@ main#content {
   text-shadow: 0 0 40px rgba(70,230,255,0.25);
   margin-bottom: 0.4rem;
 }
-.mega-title.small-mega { font-size: clamp(2.2rem, 7vw, 4rem); }
+.mega-title.small-mega { font-size: clamp(1.8rem, 5.4vw, 3.2rem); }
 
 .sub-title {
-  font-size: clamp(1.1rem, 2.4vw, 1.6rem);
+  font-size: clamp(1rem, 2vw, 1.3rem);
   font-weight: 400;
   letter-spacing: 0.08em;
   color: var(--fg);
   opacity: 0.85;
-  margin-bottom: 1.8rem;
+  margin-bottom: 1.4rem;
   text-transform: uppercase;
 }
 
 .act-title {
-  font-size: clamp(1.6rem, 4.4vw, 2.6rem);
+  font-size: clamp(1.3rem, 3.4vw, 2rem);
   font-weight: 700;
   text-transform: uppercase;
   line-height: 1.15;
-  margin-bottom: 1.6rem;
+  margin-bottom: 1.2rem;
   color: var(--fg);
 }
 
 .body-text {
-  font-size: 0.95rem;
-  line-height: 1.75;
+  font-size: 0.82rem;
+  line-height: 1.55;
   letter-spacing: 0.01em;
   color: rgba(234, 246, 255, 0.82);
   text-transform: uppercase;
-  margin-bottom: 1.2rem;
+  margin-bottom: 0.9rem;
+  max-width: 46ch;
 }
 
 .body-text.emphasis {
   color: var(--accent);
   font-weight: 700;
-  font-size: 1.05rem;
+  font-size: 0.92rem;
 }
 
 .body-text.small-caps {
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   opacity: 0.5;
-  text-align: right;
 }
 
 .body-text.quote {
-  border-left: 2px solid var(--accent-2);
-  padding-left: 1rem;
+  border-left: none;
   color: var(--accent-2);
   font-style: normal;
-  margin-top: 1.8rem;
+  margin-top: 1rem;
 }
 
 .body-text.poem {
-  font-size: 1.1rem;
-  line-height: 2;
+  font-size: 0.95rem;
+  line-height: 1.8;
   color: var(--fg);
-  margin: 1.6rem 0;
+  margin: 1.2rem 0;
 }
 
 .glitch-word {
@@ -179,14 +225,15 @@ main#content {
   list-style: none;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin: 1.4rem 0;
+  gap: 0.4rem;
+  margin: 1rem 0;
+  justify-content: center;
 }
 .chip-list li {
-  font-size: 0.68rem;
-  letter-spacing: 0.04em;
+  font-size: 0.6rem;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
-  padding: 0.45rem 0.8rem;
+  padding: 0.35rem 0.7rem;
   border: 1px solid rgba(255,255,255,0.18);
   border-radius: 999px;
   background: rgba(255,255,255,0.03);
@@ -196,18 +243,15 @@ main#content {
 .grid-4 {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 0.9rem;
-  margin: 1.6rem 0;
-}
-@media (min-width: 600px) {
-  .grid-4 { grid-template-columns: repeat(4, 1fr); }
+  gap: 0.6rem;
+  margin: 1.2rem 0;
 }
 .mini-card {
   border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 4px;
-  padding: 1rem 0.6rem;
+  border-radius: 999px;
+  padding: 0.7rem 0.5rem;
   text-align: center;
-  font-size: 0.72rem;
+  font-size: 0.6rem;
   letter-spacing: 0.03em;
   text-transform: uppercase;
   background: rgba(255,255,255,0.02);
@@ -217,21 +261,18 @@ main#content {
 .stream-links {
   display: flex;
   flex-direction: column;
-  gap: 0.9rem;
-  margin: 2rem 0;
-}
-@media (min-width: 560px) {
-  .stream-links { flex-direction: row; }
+  gap: 0.7rem;
+  margin: 1.4rem 0;
 }
 .stream-btn {
   display: inline-block;
   text-align: center;
-  padding: 0.9rem 1.6rem;
+  padding: 0.7rem 1.3rem;
   border: 1px solid var(--accent);
-  border-radius: 4px;
+  border-radius: 999px;
   color: var(--accent);
   text-decoration: none;
-  font-size: 0.78rem;
+  font-size: 0.7rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   transition: background 0.3s, color 0.3s;
@@ -244,15 +285,15 @@ main#content {
 }
 
 .footer-tag {
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   opacity: 0.4;
   letter-spacing: 0.08em;
-  margin-top: 2rem;
+  margin-top: 1.4rem;
 }
 
 .scroll-hint {
-  margin-top: 2.4rem;
-  font-size: 0.72rem;
+  margin-top: 1.6rem;
+  font-size: 0.66rem;
   letter-spacing: 0.1em;
   color: rgba(234,246,255,0.5);
   animation: pulse-fade 2.4s ease-in-out infinite;
@@ -316,7 +357,6 @@ main#content {
 }
 
 @media (max-width: 700px) {
-  .glass-card { padding: 2.2rem 1.5rem; }
   .nav-dots { right: 1rem; }
   .nav-dot span { display: none; }
 }

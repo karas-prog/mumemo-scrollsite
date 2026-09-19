@@ -4,6 +4,7 @@ const canvas = document.querySelector('#tunnel-canvas');
 const progressBar = document.querySelector('#progress-bar');
 const navDots = document.querySelectorAll('.nav-dot');
 const actSections = document.querySelectorAll('.act');
+const ringCards = document.querySelectorAll('.ring-card');
 
 const scene = new THREE.Scene();
 scene.fog = new THREE.FogExp2(0x05030a, 0.02);
@@ -99,6 +100,53 @@ function getDocScrollProgress() {
   return max > 0 ? scrollTop / max : 0;
 }
 
+function clamp01(v) {
+  return Math.max(0, Math.min(1, v));
+}
+
+function updateRingCards() {
+  const viewportH = window.innerHeight;
+  const viewportCenter = viewportH / 2;
+
+  ringCards.forEach((card) => {
+    const rect = card.getBoundingClientRect();
+    const cardCenter = rect.top + rect.height / 2;
+    const dist = cardCenter - viewportCenter;
+    const normalized = dist / viewportH;
+
+    if (normalized > 0.9) {
+      card.classList.remove('in-view', 'passed');
+      card.style.transform = 'translateZ(-900px) scale(0.35) rotateX(12deg)';
+      card.style.opacity = '0';
+      return;
+    }
+    if (normalized < -0.9) {
+      card.classList.remove('in-view');
+      card.classList.add('passed');
+      return;
+    }
+    card.classList.remove('passed');
+
+    let z, scale, rotX, opacity;
+    if (normalized >= 0) {
+      const t = clamp01(normalized / 0.9);
+      z = -900 * t;
+      scale = 1 - 0.65 * t;
+      rotX = 12 * t;
+      opacity = 1 - t * 0.85;
+    } else {
+      const t = clamp01(-normalized / 0.9);
+      z = 500 * t;
+      scale = 1 + 0.5 * t;
+      rotX = -8 * t;
+      opacity = 1 - t;
+    }
+    card.classList.toggle('in-view', Math.abs(normalized) < 0.55);
+    card.style.transform = `translateZ(${z.toFixed(1)}px) scale(${scale.toFixed(3)}) rotateX(${rotX.toFixed(2)}deg)`;
+    card.style.opacity = opacity.toFixed(3);
+  });
+}
+
 function updateActiveSection() {
   let activeIndex = 0;
   let minDist = Infinity;
@@ -108,19 +156,19 @@ function updateActiveSection() {
     const sectionCenter = window.scrollY + rect.top + rect.height / 2;
     const dist = Math.abs(viewportCenter - sectionCenter);
     if (dist < minDist) { minDist = dist; activeIndex = i; }
-    const inView = rect.top < window.innerHeight * 0.75 && rect.bottom > window.innerHeight * 0.25;
-    const card = section.querySelector('.glass-card');
-    if (card) card.classList.toggle('in-view', inView);
   });
   navDots.forEach((dot, i) => dot.classList.toggle('active', i === activeIndex));
   targetHue = HUES[activeIndex] ?? HUES[0];
 }
 
-window.addEventListener('scroll', () => {
+function onScroll() {
   scrollProgress = getDocScrollProgress();
   progressBar.style.width = `${scrollProgress * 100}%`;
   updateActiveSection();
-}, { passive: true });
+  updateRingCards();
+}
+
+window.addEventListener('scroll', onScroll, { passive: true });
 
 window.addEventListener('mousemove', (e) => {
   mouseX = (e.clientX / window.innerWidth) * 2 - 1;
@@ -131,6 +179,7 @@ window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
+  updateRingCards();
 });
 
 function animate(time) {
@@ -174,5 +223,6 @@ function animate(time) {
 }
 
 updateActiveSection();
+updateRingCards();
 progressBar.style.width = `${getDocScrollProgress() * 100}%`;
 requestAnimationFrame(animate);
