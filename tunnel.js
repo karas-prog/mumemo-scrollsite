@@ -4,35 +4,38 @@ const canvas = document.querySelector('#tunnel-canvas');
 const progressBar = document.querySelector('#progress-bar');
 const navDots = document.querySelectorAll('.nav-dot');
 const actSections = document.querySelectorAll('.act');
-const ringCards = document.querySelectorAll('.ring-card');
+const floatTexts = document.querySelectorAll('.float-text');
 
 const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x05030a, 0.02);
+scene.fog = new THREE.FogExp2(0x060213, 0.016);
 
-const camera = new THREE.PerspectiveCamera(72, window.innerWidth / window.innerHeight, 0.1, 160);
+const camera = new THREE.PerspectiveCamera(72, window.innerWidth / window.innerHeight, 0.1, 200);
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setClearColor(0x05030a);
+renderer.setClearColor(0x060213);
 scene.add(camera);
 
 const world = new THREE.Group();
 scene.add(world);
 
-const hemi = new THREE.HemisphereLight(0xa855f7, 0x06162f, 2.1);
+const hemi = new THREE.HemisphereLight(0xb066ff, 0x120b2e, 3.2);
 scene.add(hemi);
-const pulseLight = new THREE.PointLight(0x46e6ff, 6, 40, 2);
+const pulseLight = new THREE.PointLight(0x5ef4ff, 9, 46, 2);
 pulseLight.position.set(0, 0, 3);
 scene.add(pulseLight);
-const magentaLight = new THREE.PointLight(0xff4fa3, 4.5, 36, 2);
+const magentaLight = new THREE.PointLight(0xff5cc0, 7.5, 42, 2);
 magentaLight.position.set(0, 0, -14);
 scene.add(magentaLight);
+const goldLight = new THREE.PointLight(0xffe14d, 4.5, 50, 2);
+goldLight.position.set(0, 0, -30);
+scene.add(goldLight);
 
 const TUNNEL_RADIUS = 9.7;
-const RING_COUNT = 42;
+const RING_COUNT = 46;
 const RING_SPACING = 5.4;
 const TUNNEL_LENGTH = RING_COUNT * RING_SPACING;
-const TUNNEL_BEND_AMOUNT = 2.1;
+const TUNNEL_BEND_AMOUNT = 2.3;
 const TUNNEL_BEND_FREQ = 0.05;
 
 function tunnelBendOffset(z) {
@@ -44,16 +47,17 @@ function tunnelBendOffset(z) {
 
 const tunnelRings = [];
 const stars = [];
+const sparks = [];
 
 const HUES = [265, 185, 325, 40, 150].map((h) => h / 360);
 
 function makeTunnel() {
-  const geometry = new THREE.TorusGeometry(TUNNEL_RADIUS, 0.08, 8, 48);
+  const geometry = new THREE.TorusGeometry(TUNNEL_RADIUS, 0.1, 8, 48);
   for (let i = 0; i < RING_COUNT; i += 1) {
     const material = new THREE.MeshBasicMaterial({
-      color: 0x46e6ff,
+      color: 0x5ef4ff,
       transparent: true,
-      opacity: 0.22
+      opacity: 0.38
     });
     const ring = new THREE.Mesh(geometry, material);
     const z = -i * RING_SPACING;
@@ -68,20 +72,39 @@ function makeTunnel() {
 }
 
 function makeStars() {
-  const geometry = new THREE.SphereGeometry(0.026, 5, 5);
-  const material = new THREE.MeshBasicMaterial({ color: 0xd9f7ff, transparent: true, opacity: 0.7 });
-  for (let i = 0; i < 260; i += 1) {
+  const geometry = new THREE.SphereGeometry(0.03, 5, 5);
+  const material = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.85 });
+  for (let i = 0; i < 320; i += 1) {
     const star = new THREE.Mesh(geometry, material);
     const angle = Math.random() * Math.PI * 2;
-    const radius = 2 + Math.random() * 13;
+    const radius = 2 + Math.random() * 14;
     star.position.set(Math.cos(angle) * radius, Math.sin(angle) * radius, -Math.random() * TUNNEL_LENGTH);
     stars.push(star);
     world.add(star);
   }
 }
 
+function makeSparks() {
+  const sparkColors = [0x5ef4ff, 0xff5cc0, 0xffe14d, 0xffffff];
+  for (let i = 0; i < 160; i += 1) {
+    const color = sparkColors[Math.floor(Math.random() * sparkColors.length)];
+    const size = 0.02 + Math.random() * 0.05;
+    const geometry = new THREE.SphereGeometry(size, 5, 5);
+    const material = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.9 });
+    const spark = new THREE.Mesh(geometry, material);
+    const angle = Math.random() * Math.PI * 2;
+    const radius = Math.random() * TUNNEL_RADIUS * 0.9;
+    spark.position.set(Math.cos(angle) * radius, Math.sin(angle) * radius, -Math.random() * TUNNEL_LENGTH);
+    spark.userData.speed = 6 + Math.random() * 14;
+    spark.userData.twinklePhase = Math.random() * 10;
+    sparks.push(spark);
+    world.add(spark);
+  }
+}
+
 makeTunnel();
 makeStars();
+makeSparks();
 
 let scrollProgress = 0;
 let smoothProgress = 0;
@@ -100,50 +123,15 @@ function getDocScrollProgress() {
   return max > 0 ? scrollTop / max : 0;
 }
 
-function clamp01(v) {
-  return Math.max(0, Math.min(1, v));
-}
-
-function updateRingCards() {
+function updateFloatTexts() {
   const viewportH = window.innerHeight;
-  const viewportCenter = viewportH / 2;
-
-  ringCards.forEach((card) => {
-    const rect = card.getBoundingClientRect();
-    const cardCenter = rect.top + rect.height / 2;
-    const dist = cardCenter - viewportCenter;
-    const normalized = dist / viewportH;
-
-    if (normalized > 0.9) {
-      card.classList.remove('in-view', 'passed');
-      card.style.transform = 'translateZ(-900px) scale(0.35) rotateX(12deg)';
-      card.style.opacity = '0';
-      return;
-    }
-    if (normalized < -0.9) {
-      card.classList.remove('in-view');
-      card.classList.add('passed');
-      return;
-    }
-    card.classList.remove('passed');
-
-    let z, scale, rotX, opacity;
-    if (normalized >= 0) {
-      const t = clamp01(normalized / 0.9);
-      z = -900 * t;
-      scale = 1 - 0.65 * t;
-      rotX = 12 * t;
-      opacity = 1 - t * 0.85;
-    } else {
-      const t = clamp01(-normalized / 0.9);
-      z = 500 * t;
-      scale = 1 + 0.5 * t;
-      rotX = -8 * t;
-      opacity = 1 - t;
-    }
-    card.classList.toggle('in-view', Math.abs(normalized) < 0.55);
-    card.style.transform = `translateZ(${z.toFixed(1)}px) scale(${scale.toFixed(3)}) rotateX(${rotX.toFixed(2)}deg)`;
-    card.style.opacity = opacity.toFixed(3);
+  floatTexts.forEach((el) => {
+    const rect = el.getBoundingClientRect();
+    const center = rect.top + rect.height / 2;
+    const inView = center > viewportH * 0.06 && center < viewportH * 0.94;
+    const passedUp = center <= viewportH * 0.06;
+    el.classList.toggle('in-view', inView);
+    el.classList.toggle('passed', passedUp && !inView);
   });
 }
 
@@ -165,7 +153,7 @@ function onScroll() {
   scrollProgress = getDocScrollProgress();
   progressBar.style.width = `${scrollProgress * 100}%`;
   updateActiveSection();
-  updateRingCards();
+  updateFloatTexts();
 }
 
 window.addEventListener('scroll', onScroll, { passive: true });
@@ -179,7 +167,7 @@ window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
-  updateRingCards();
+  updateFloatTexts();
 });
 
 function animate(time) {
@@ -194,8 +182,8 @@ function animate(time) {
   const cameraZ = -smoothProgress * (TUNNEL_LENGTH - 20);
   const bend = tunnelBendOffset(cameraZ);
 
-  camera.position.x = bend.x * 0.6 + smoothMouseX * 0.6;
-  camera.position.y = bend.y * 0.6 - smoothMouseY * 0.4;
+  camera.position.x = bend.x * 0.6 + smoothMouseX * 0.7;
+  camera.position.y = bend.y * 0.6 - smoothMouseY * 0.5;
   camera.position.z = cameraZ + 6;
   camera.lookAt(bend.x, bend.y, cameraZ - 20);
 
@@ -204,25 +192,39 @@ function animate(time) {
     const b = tunnelBendOffset(localZ);
     ring.position.x = b.x;
     ring.position.y = b.y;
-    ring.rotation.z += dt * (0.18 + Math.sin(time * 0.0006 + ring.userData.phase) * 0.05);
-    ring.scale.setScalar(1 + Math.sin(time * 0.0009 + ring.userData.phase) * 0.04);
-    ring.material.color.setHSL(currentHue, 0.85, 0.6);
+    ring.rotation.z += dt * (0.2 + Math.sin(time * 0.0006 + ring.userData.phase) * 0.06);
+    ring.scale.setScalar(1 + Math.sin(time * 0.0009 + ring.userData.phase) * 0.05);
+    ring.material.color.setHSL(currentHue, 0.95, 0.68);
   }
 
   for (const star of stars) {
-    star.material.opacity = 0.5 + Math.sin(time * 0.001 + star.position.x) * 0.2;
+    star.material.opacity = 0.55 + Math.sin(time * 0.0012 + star.position.x) * 0.35;
   }
 
-  pulseLight.color.setHSL(currentHue, 0.9, 0.62);
-  magentaLight.color.setHSL((currentHue + 0.12) % 1, 0.85, 0.55);
+  for (const spark of sparks) {
+    spark.position.z += spark.userData.speed * dt;
+    if (spark.position.z > cameraZ + 8) {
+      const angle = Math.random() * Math.PI * 2;
+      const radius = Math.random() * TUNNEL_RADIUS * 0.9;
+      spark.position.set(Math.cos(angle) * radius, Math.sin(angle) * radius, cameraZ - TUNNEL_LENGTH * 0.8);
+    }
+    const twinkle = 0.55 + Math.sin(time * 0.006 + spark.userData.twinklePhase) * 0.45;
+    spark.material.opacity = Math.max(0, twinkle);
+    spark.scale.setScalar(0.8 + twinkle * 0.6);
+  }
+
+  pulseLight.color.setHSL(currentHue, 1, 0.66);
+  magentaLight.color.setHSL((currentHue + 0.12) % 1, 0.95, 0.6);
+  goldLight.color.setHSL((currentHue + 0.22) % 1, 0.9, 0.6);
   pulseLight.position.z = cameraZ + 3;
   magentaLight.position.z = cameraZ - 10;
+  goldLight.position.z = cameraZ - 26;
 
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
 }
 
 updateActiveSection();
-updateRingCards();
+updateFloatTexts();
 progressBar.style.width = `${getDocScrollProgress() * 100}%`;
 requestAnimationFrame(animate);
